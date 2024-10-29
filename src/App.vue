@@ -1,14 +1,14 @@
 <template>
-  <HelloWorld />
+  <AlertInbox />
 </template>
 
 <script>
-import HelloWorld from './components/HelloWorld.vue';
+import AlertInbox from './components/AlertInbox.vue';
 
 export default {
   name: 'App',
   components: {
-    HelloWorld
+    AlertInbox
   }
 }
 </script>
