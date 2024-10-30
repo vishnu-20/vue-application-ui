@@ -113,7 +113,7 @@ export default {
         },
     },
     methods: {
-        methods: {
+
             toggleAllSelection() {
             // If allSelected, clear; otherwise, select all rows
             this.allSelected = !this.allSelected;
@@ -130,7 +130,7 @@ export default {
             // Update header checkbox status
             this.allSelected = this.selectedRows.length === this.tableData.length;
             this.$emit("selectionChanged", this.selectedRows);
-        },
+  
         },
         handleEditAlertModal(rowData) {
             this.$emit("editAlert", rowData)
