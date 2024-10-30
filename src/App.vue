@@ -3,7 +3,7 @@
 </template>
 
 <script>
-import AlertInbox from './components/AlertInbox.vue';
+import AlertInbox from './components/alertInbox/AlertInbox.vue';
 
 export default {
   name: 'App',
