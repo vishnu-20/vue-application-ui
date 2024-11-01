@@ -1,6 +1,8 @@
 <template>
   <div class="flex-start">
     <div class="title">Alert Inbox</div>
+
+    <DatePickerWrapper />
     
     <div v-if="this.isLoading" class="loading">
       loading ...........
@@ -29,7 +31,9 @@
 </template>
 <script>
 import DataTable from '../DataTable.vue';
+import DatePickerWrapper from './DatePickerWrapper.vue';
 import TableFilter from './TableFilter.vue';
+import DateRangePicker from 'vue2-daterange-picker'
 
 
 export default {
@@ -42,7 +46,9 @@ export default {
   },
   components: {
     DataTable,
-    TableFilter
+    TableFilter,
+    DatePickerWrapper,
+    DateRangePicker 
   },
   data() {
     return {
@@ -62,10 +68,11 @@ export default {
       opened: false,
       url: `/alerts/management/results/e06c736669e2a1f685f780cf9eaa3d6b`,
       metadata: [
-          { id: 1,fieldName: "title", fieldText: "TITLE", width: 295, color: "#267ABD", checkBox: true },
-          { id : 2,fieldName: "type", fieldText: "TYPE", width: 105, color: "#267ABD" },
-          { id :3 ,fieldName: "date", fieldText: "DATE", width: 105, color: "#267ABD" },
-          { id : 4,fieldName: "clientMatter", fieldText: "CLIENT MATTER", width: 105, color: "#267ABD" },
+      { id: 1,fieldName: "checkbox", fieldText: "", width: 20, color: "#267ABD", checkBox: true },
+          { id: 2,fieldName: "title", fieldText: "TITLE", width: 295, color: "#267ABD", },
+          { id : 3,fieldName: "type", fieldText: "TYPE", width: 105, color: "#267ABD" },
+          { id :4 ,fieldName: "date", fieldText: "DATE", width: 105, color: "#267ABD" },
+          { id : 5,fieldName: "clientMatter", fieldText: "CLIENT MATTER", width: 105, color: "#267ABD" },
         ],
     }
   },
@@ -74,6 +81,8 @@ export default {
       console.log("----updateSelectedRows----");
       
       this.selectedRows = selectedRows;
+      console.log("----updateSelectedRows----", this.selectedRows);
+
     },
     handleSearchTermUpdate(term) {
       if (term) {

@@ -12,7 +12,7 @@
                     :sortable="header.sortable"
                     :sort-field="sortField"
                     :sort-direction="sortDirection"
-                    :selectable="selectable && index === 0"
+                    :selectable="selectable"
                     :allSelected="allSelected"
                     :isFirstColumn="index === 0"
                     @toggleAllSelection="toggleAllSelection"
@@ -118,7 +118,7 @@ export default {
             // If allSelected, clear; otherwise, select all rows
             this.allSelected = !this.allSelected;
             this.selectedRows = this.allSelected ? this.tableData.map(row => row.id) : [];
-            this.$emit("selectionChanged", this.selectedRows);  // Notify parent of selected rows
+            this.$emit("selectionChanged", this.selectedRows);  
         },
         toggleRowSelection(rowId) {
             // If rowId in selectedRows, remove; otherwise, add it
