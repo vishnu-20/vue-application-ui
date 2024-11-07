@@ -33,7 +33,6 @@
 import DataTable from '../DataTable.vue';
 import DatePickerWrapper from './DatePickerWrapper.vue';
 import TableFilter from './TableFilter.vue';
-import DateRangePicker from 'vue2-daterange-picker'
 
 
 export default {
@@ -48,7 +47,6 @@ export default {
     DataTable,
     TableFilter,
     DatePickerWrapper,
-    DateRangePicker 
   },
   data() {
     return {

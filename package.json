@@ -13,7 +13,8 @@
     "flatpickr": "^4.6.13",
     "vue": "^3.2.13",
     "vue-flatpickr-component": "^11.0.5",
-    "vue2-daterange-picker": "^0.6.8"
+    "vue2-daterange-picker": "^0.6.8",
+    "vue3-date-time-picker": "^2.8.3"
   },
   "devDependencies": {
     "@babel/core": "^7.12.16",
