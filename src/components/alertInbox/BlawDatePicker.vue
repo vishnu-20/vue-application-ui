@@ -54,14 +54,14 @@ export default {
       selected: { start: null, end: null },
       daysOfWeek: ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"],
       months: ["JAN", "FEB", "MAR", "APR", "MAY", "JUNE", "JULY", "AUG", "SEP", "OCT", "NOV", "DEC"],
-      yearStart: new Date().getFullYear() - 5 // Starting year for the 12-year range displayed in YEAR_VIEW
+      yearStart: new Date().getFullYear() - 5
     };
   },
   computed: {
     label() {
       if (this.currentView === 'DAY_VIEW') return `${this.months[this.current.month]} ${this.current.year}`;
       if (this.currentView === 'MONTH_VIEW') return `${this.current.year}`;
-      return `${this.yearStart} - ${this.yearStart + 11}`; // Label for YEAR_VIEW
+      return `${this.yearStart} - ${this.yearStart + 11}`;
     },
     calendarItems() {
       if (this.currentView === 'DAY_VIEW') return this.populateDays();
@@ -69,7 +69,6 @@ export default {
       return this.populateYears();
     },
     years() {
-      // Returns the 12-year range for display in YEAR_VIEW
       return Array.from({ length: 12 }, (_, i) => this.yearStart + i);
     }
   },
@@ -93,7 +92,6 @@ export default {
       return calendarItems;
     },
     populateYears() {
-      // Returns the fixed 12-year range for YEAR_VIEW
       return Array.from({ length: 12 }, (_, i) => this.yearStart + i);
     },
     isToday(item) {
@@ -128,7 +126,7 @@ export default {
     },
     selectYear(year) {
       this.current.year = year;
-      this.currentView = 'MONTH_VIEW'; // Switch back to MONTH_VIEW after selecting a year
+      this.currentView = 'MONTH_VIEW';
     },
     switchView() {
       if (this.currentView === 'DAY_VIEW') {
@@ -146,8 +144,6 @@ export default {
   width: 360px;
   border: 1px solid #bbbbbb;
   background-color: #F0F3F7;
-  display: block;
-  user-select: none;
 }
 .header {
   display: flex;
@@ -165,11 +161,8 @@ export default {
   grid-template-columns: repeat(7, 1fr);
   text-align: center;
 }
-.months-grid {
+.months-grid, .years-grid {
   grid-template-columns: repeat(3, 1fr);
-}
-.years-grid {
-  grid-template-columns: repeat(3, 1fr); /* Display years in a 3-column grid */
 }
 .calendar-day, .calendar-month, .calendar-year {
   padding: 10px;

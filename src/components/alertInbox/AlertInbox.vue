@@ -2,12 +2,20 @@
   <div class="flex-start">
     <div class="title">Alert Inbox</div>
 
-    <DatePickerWrapper />
+    <!-- DatePicker Component with two-way data binding -->
+    <DatePicker v-model="selectedDates" :range="true" />
     
-    <div v-if="this.isLoading" class="loading">
+    <!-- Display the selected start and end dates -->
+    <p>Selected Start Date: {{ selectedDates.start }}</p>
+    <p>Selected End Date: {{ selectedDates.end }}</p>
+    
+    <!-- Loading indicator -->
+    <div v-if="isLoading" class="loading">
       loading ...........
     </div>
-    <div class="flex" :class="this.isLoading ? 'hideData' : 'showData'">
+
+    <!-- Main content area with DataTable and TableFilter components -->
+    <div class="flex" :class="isLoading ? 'hideData' : 'showData'">
       <div class="filter-component">
         <TableFilter :tableData="[...metadata]" @filter-changed="applyFilter" />
       </div>
@@ -29,11 +37,11 @@
     </div>
   </div>
 </template>
+
 <script>
 import DataTable from '../DataTable.vue';
-import DatePickerWrapper from './DatePickerWrapper.vue';
+import DatePicker from './DatePicker.vue';
 import TableFilter from './TableFilter.vue';
-
 
 export default {
   name: "AlertInbox",
@@ -46,10 +54,11 @@ export default {
   components: {
     DataTable,
     TableFilter,
-    DatePickerWrapper,
+    DatePicker,
   },
   data() {
     return {
+      selectedDates: { start: null, end: null }, // Selected dates from DatePicker
       data: null,
       selectedRows: [],
       error: false,
@@ -66,78 +75,54 @@ export default {
       opened: false,
       url: `/alerts/management/results/e06c736669e2a1f685f780cf9eaa3d6b`,
       metadata: [
-      { id: 1,fieldName: "checkbox", fieldText: "", width: 20, color: "#267ABD", checkBox: true },
-          { id: 2,fieldName: "title", fieldText: "TITLE", width: 295, color: "#267ABD", },
-          { id : 3,fieldName: "type", fieldText: "TYPE", width: 105, color: "#267ABD" },
-          { id :4 ,fieldName: "date", fieldText: "DATE", width: 105, color: "#267ABD" },
-          { id : 5,fieldName: "clientMatter", fieldText: "CLIENT MATTER", width: 105, color: "#267ABD" },
-        ],
-    }
+        { id: 1, fieldName: "checkbox", fieldText: "", width: 20, color: "#267ABD", checkBox: true },
+        { id: 2, fieldName: "title", fieldText: "TITLE", width: 295, color: "#267ABD" },
+        { id: 3, fieldName: "type", fieldText: "TYPE", width: 105, color: "#267ABD" },
+        { id: 4, fieldName: "date", fieldText: "DATE", width: 105, color: "#267ABD" },
+        { id: 5, fieldName: "clientMatter", fieldText: "CLIENT MATTER", width: 105, color: "#267ABD" },
+      ],
+    };
   },
   methods: {
     updateSelectedRows(selectedRows) {
-      console.log("----updateSelectedRows----");
-      
+      console.log("Selected Rows:", selectedRows);
       this.selectedRows = selectedRows;
-      console.log("----updateSelectedRows----", this.selectedRows);
-
     },
-    handleSearchTermUpdate(term) {
-      if (term) {
-        this.terms = [{ label: term, hideRemove: false }]
-      } else {
-        this.terms = []
-      }
-      this.searchTerm = term
-      this.$refs.dataTable.fetchData(this.pageNumber)
+    applyFilter() {
+      // Method to handle filtering logic
     },
     updateOwners(newOwners) {
-      this.owners = newOwners
+      this.owners = newOwners;
     },
     updateIsAdmin(newValue) {
-      this.isAdmin = newValue
+      this.isAdmin = newValue;
     },
     updateLoader(loaded) {
-      this.isLoading = loaded
-    },
-    removeTerm(index) {
-      this.terms.splice(index, 1)
-      if (this.terms.length === 0) {
-        this.searchTerm = ""
-      }
-      this.$refs.dataTable.fetchData(this.pageNumber)
-    },
-    handleOwnerCheckboxChange(selectedOwners) {
-      this.$refs.dataTable.users = selectedOwners
-      this.$refs.dataTable.fetchData(this.pageNumber)
+      this.isLoading = loaded;
     },
     handleEditAlert(detail) {
-      this.subId = detail.subId
-      this.$refs.alertModalApp.showAlertModal({
-        detail: this.subId,
-      })
+      this.subId = detail.subId;
+      this.$refs.alertModalApp.showAlertModal({ detail: this.subId });
     },
     updateError(error) {
-      this.error = error
+      this.error = error;
     },
   },
   mounted() {
     this.$nextTick(() => {
       if (this.$refs.dataTable) {
-        this.$refs.dataTable.fetchData(this.pageNumber)
+        this.$refs.dataTable.fetchData(this.pageNumber);
       }
-    })
+    });
   },
-}
+};
 </script>
+
 <style scoped lang="scss">
 .flex-start {
   width: 1450px;
   align-item: start;
   flex-direction: row;
-  .SearchResultsFilters {
-    margin-right: 16px;
-  }
   font-family: var(--font-family, "Open Sans", sans-serif);
   font-size: var(--font-size, 15px);
 }
