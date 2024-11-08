@@ -84,6 +84,7 @@ export default {
   text-align: center;
   margin: 20px;
 }
+
 .date-input {
   display: inline-block;
   padding: 8px;
@@ -92,11 +93,18 @@ export default {
   border: 1px solid #cccccc;
   border-radius: 4px;
   cursor: pointer;
-  min-width: 200px;
+  min-width: 150px; 
+  max-width: 100%; 
   text-align: left;
   background-color: white;
+  white-space: nowrap; 
+  overflow: hidden; 
+  text-overflow: ellipsis; 
+  box-sizing: border-box;
 }
+
 .date-input:focus-within {
   border-color: #0d9ddb;
 }
 </style>
+
