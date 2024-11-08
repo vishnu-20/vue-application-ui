@@ -4,7 +4,7 @@
 
     <!-- DatePicker Component with two-way data binding -->
     <DatePicker v-model="selectedDates" :range="true" />
-    
+
     <!-- Display the selected start and end dates -->
     <p>Selected Start Date: {{ selectedDates.start }}</p>
     <p>Selected End Date: {{ selectedDates.end }}</p>
