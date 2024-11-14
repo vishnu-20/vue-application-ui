@@ -1,66 +1,40 @@
 <template>
-    <div>
-        <table class="data-table">
-            <!-- Header Row -->
+    <div class="data-table-container">
+        <table class="data-table" v-if="true">
             <tr class="table-header">
-                <TableHeaderCell
-                    v-for="(header, index) in metadata"
-                    :key="header.fieldName"
-                    :field-name="header.fieldName"
-                    :header-text="header.fieldText"
-                    :width="header.width"
-                    :sortable="header.sortable"
-                    :sort-field="sortField"
-                    :sort-direction="sortDirection"
-                    :selectable="selectable"
-                    :allSelected="allSelected"
-                    :isFirstColumn="index === 0"
-                    @toggleAllSelection="toggleAllSelection"
-                    @sort="_sort"
-                />
-            </tr>
+                <TableHeaderCell v-for="(header) in metadata" :key="header.fieldName" :field-name="header.fieldName"
+                    :header-text="header.fieldText" :width="header.width" :sortable="header.sortable"
 
-            <!-- Data Rows -->
-            <tr class="table-data" v-for="(data, index) in tableData" :key="data.id">
-                <TableCell
-                    v-for="(header, idx) in metadata"
-                    :key="header.fieldName"
-                    :field-value="_cellValue(data, header)"
-                    :link="_link(data, header)"
-                    :icon-link="_iconLink(data, header)"
-                    :index="index"
-                    :selectable="selectable && idx === 0"
-                    :isFirstColumn="idx === 0"
-                    :isSelected="selectedRows.includes(data.id)"
-                    @toggleRowSelection="toggleRowSelection"
-                    @editAlert="handleEditAlertModal(data)"
-                />
+                    :sort-field="this.queryParams['sort_field']" 
+                    :sort-direction="this.queryParams['sort_direction']"
+                    @sort="_sort($event)" />
+            </tr>
+            <tr class="table-data" v-for="(data, index) in tableData" :key="data.alertId">
+                <TableCell v-for="(header) in metadata" :key="header.fieldName" 
+                :field-value="_cellValue(data, header)"
+                    :field-icon="_fieldIcon(data, header)" :link="_link(data, header)"
+                    :icon-link="_iconLink(data, header)" :index="index" :event="header.eventName"
+                    @editAlert="handleEditAlertModal(data)" />
             </tr>
         </table>
-
-        <!-- No data message -->
-        <div v-if="!tableData.length" class="no-alerts">
+        <div v-if="!this.loaded" class="loading">
+            <Spinner />
+        </div>
+        <div v-if="!showTable && this.loaded && !this.error" class="no-alerts">
             <h2>No alert subscriptions found</h2>
         </div>
+        <span class="navigation" v-if="showTable">
+
+        </span>
     </div>
 </template>
-
 <script>
-import TableCell from './TableCell.vue';
-import TableHeaderCell from './TableHeaderCell.vue';
-
-
-
+import TableHeaderCell from "./TableHeaderCell.vue"
+import TableCell from "./TableCell.vue"
+import dayjs from "dayjs"
 export default {
     name: "DataTable",
-    emits: [
-        "updateOwners",
-        "updateIsAdmin",
-        "editAlert",
-        "updateLoader",
-        "pageChange",
-        "updateError",
-    ],
+    emits: ["editAlert", "updateError"],
     components: {
         TableHeaderCell,
         TableCell,
@@ -75,33 +49,19 @@ export default {
             type: Array,
             default: () => [],
         },
-        selectable: {
-            type: Boolean,
-            default: false,
+        queryParams: {
+            type: Object,
+            default: () => { },
         },
+
     },
     data() {
         return {
-            selectedRows: [],
-            allSelected: false,
             count: 0,
-            sortField: "",
-            sortDirection: "",
-            currentPage: 1,
             pageSize: 25,
             tableData: [],
             loaded: false,
             error: false,
-            isAdmin: false,
-            owners: [],
-            // DataTable emits events for changes to these params
-            managedQueryParams: [
-                "page_number",
-                "search_term",
-                "field",
-                "order",
-                "pageSize",
-            ],
         }
     },
     computed: {
@@ -113,54 +73,102 @@ export default {
         },
     },
     methods: {
-
-            toggleAllSelection() {
-            // If allSelected, clear; otherwise, select all rows
-            this.allSelected = !this.allSelected;
-            this.selectedRows = this.allSelected ? this.tableData.map(row => row.id) : [];
-            this.$emit("selectionChanged", this.selectedRows);  
-        },
-        toggleRowSelection(rowId) {
-            // If rowId in selectedRows, remove; otherwise, add it
-            if (this.selectedRows.includes(rowId)) {
-                this.selectedRows = this.selectedRows.filter(id => id !== rowId);
-            } else {
-                this.selectedRows.push(rowId);
-            }
-            // Update header checkbox status
-            this.allSelected = this.selectedRows.length === this.tableData.length;
-            this.$emit("selectionChanged", this.selectedRows);
-  
-        },
         handleEditAlertModal(rowData) {
             this.$emit("editAlert", rowData)
-        }, async fetchData(pageNumber) {
+        },
+        async fetchData() {
             try {
                 this.loaded = false
-                // const response = await DataTableManager.fetch(this.url, {
-                //   params: {
-                //     search_term: this.$parent.searchTerm,
-                //     page_number: pageNumber,
-                //     users: this.users,
-                //   },
-                //   headers: { "Content-Type": "application/json" },
-                // })
-                const response = { pageNumber: pageNumber };
-                this.tableData = [{ id: 1, title: "Sample Title 1", type: "Legal Search", date: "10/28/2024 11:02 AM", clientMatter: "None" },
-                { id: 2, title: "Sample Title 2", type: "Legal Search", date: "10/28/2024 10:28 AM", clientMatter: "None" },
-                { id: 3, title: "Sample Title 3", type: "Docket Search", date: "10/27/2024 10:28 AM", clientMatter: "Basic Tag" },]
-                this.count = response.data.data.resultCount
-                this.isAdmin = response.data.data.criteria.admin
-                this.owners = response.data.owners
-                if (this.isAdmin) {
-                    this.$emit("updateIsAdmin", this.isAdmin)
-                } if (this.owners) {
-                    this.$emit("updateOwners", this.owners)
+                this.error = false
+                const response = {
+
+                    results: [
+                        {
+                            "alertId": 4702695,
+                            "ssid": 100056035,
+                            "uuid": 6673555,
+                            "contentType": "GENERIC_LAW",
+                            "name": "Suit test search",
+                            "created": "2021-08-16T12:51:37.000+00:00",
+                            "lastUpdated": "2021-08-16T12:51:38.000+00:00",
+                            "reportId": 3955845,
+                            "status": "ACTIVE",
+                            "userStatus": "UNREAD",
+                            "clientMatter": null,
+                            "origin": "BLAW",
+                            "reportStatus": "FULL_REPORT",
+                            "tags": [
+                                "testtag"
+                            ]
+                        },
+                        {
+                            "alertId": 4702697,
+                            "ssid": 100056037,
+                            "uuid": 6673555,
+                            "contentType": "GENERIC_LAW",
+                            "name": "Suit test search",
+                            "created": "2021-08-16T12:51:37.000+00:00",
+                            "lastUpdated": "2021-08-16T12:51:38.000+00:00",
+                            "reportId": 3955847,
+                            "status": "ACTIVE",
+                            "userStatus": "UNREAD",
+                            "clientMatter": null,
+                            "origin": "BLAW",
+                            "reportStatus": "FULL_REPORT",
+                            "tags": [
+                                "testtag"
+                            ]
+                        },
+                        {
+                            "alertId": 4702707,
+                            "ssid": 100056035,
+                            "uuid": 6673555,
+                            "contentType": "GENERIC_LAW",
+                            "name": "Suit test search",
+                            "created": "2021-08-16T12:51:37.000+00:00",
+                            "lastUpdated": "2021-08-16T12:51:38.000+00:00",
+                            "reportId": 3955855,
+                            "status": "ACTIVE",
+                            "userStatus": "UNREAD",
+                            "clientMatter": null,
+                            "origin": "BLAW",
+                            "reportStatus": "FULL_REPORT",
+                            "tags": [
+                                "testtag"
+                            ]
+                        },
+                        {
+                            "alertId": 4702709,
+                            "ssid": 100056037,
+                            "uuid": 6673555,
+                            "contentType": "GENERIC_LAW",
+                            "name": "Suit test search",
+                            "created": "2021-08-16T12:51:37.000+00:00",
+                            "lastUpdated": "2021-08-16T12:51:38.000+00:00",
+                            "reportId": 3955853,
+                            "status": "ACTIVE",
+                            "userStatus": "UNREAD",
+                            "clientMatter": null,
+                            "origin": "BLAW",
+                            "reportStatus": "FULL_REPORT",
+                            "tags": [
+                                "testtag"
+                            ]
+                        },
+                    ]
+
+                };
+                if (response.results === null) {
+                    this.error = true
+                    this.tableData = []
+                } else {
+                    this.tableData = response.results
                 }
-                this.$emit("updateLoader", false)
+                this.count = response.facets.count
+                // eslint-disable-next-line vue/no-mutating-props
+                this.queryParams["page_number"] = parseInt(response.data.page_number)
             } catch (error) {
                 this.error = true
-                this.$emit("updateLoader", false)
                 this.$emit("updateError", true)
             } finally {
                 this.loaded = true
@@ -168,60 +176,102 @@ export default {
         },
         _updateParams(event) {
             this.pageSize = event.pageSize ? event.pageSize : this.pageSize
-            this.currentPage = event.pageNum
-            this.fetchData(this.currentPage)
-            this.$emit("pageChange", event)
+            // eslint-disable-next-line vue/no-mutating-props
+            this.queryParams["page_number"] = event.pageNum
+            this.fetchData()
         },
         _sort(data) {
-            this.currentPage = 1
-            this.sortField = data.sortField
-            this.sortDirection = data.sortDirection
-            this.$emit("sortEvent", {
-                sortField: data.sortField,
-                sortDirection: data.sortDirection,
-            })
+            // eslint-disable-next-line vue/no-mutating-props
+            this.queryParams["page_number"] = 1
+            // eslint-disable-next-line vue/no-mutating-props
+            this.queryParams["sort_field"] = data.sortField
+            // eslint-disable-next-line vue/no-mutating-props
+            this.queryParams["sort_direction"] = data.sortDirection
             this.fetchData()
-        }, _cellValue(data, header) {
+        },
+        _updateParams(event) {
+            this.pageSize = event.pageSize ? event.pageSize : this.pageSize
+            // eslint-disable-next-line vue/no-mutating-props
+            this.queryParams["page_number"] = event.pageNum
+            this.fetchData()
+        },
+        _sort(data) {
+            // eslint-disable-next-line vue/no-mutating-props
+            this.queryParams["page_number"] = 1
+            // eslint-disable-next-line vue/no-mutating-props
+            this.queryParams["sort_field"] = data.sortField
+            // eslint-disable-next-line vue/no-mutating-props
+            this.queryParams["sort_direction"] = data.sortDirection
+            this.fetchData()
+        },
+        _cellValue(data, header) {
             const key = header.fieldName
             if (data[key] && data[key].value) {
                 return data[key].value
-            } else if (data[key] && typeof data[key] === "object") {
-                return data[key]["id"]
-            } else if (
-                this.isAdmin &&
-                data[header["_fieldName"]] &&
-                data[header["_fieldName"]].length > 0
-            ) {
-                return data[key] + "<hr>" + data[header["_fieldName"]].join(", <br>")
-            } else if (!this.isAdmin && data[header["_fieldName"]]) {
-                return data[header["_fieldName"]].join(", <br>")
-            } else if (header.hyperLink) {
+            } else if (data[header.secondFieldName]) {
+                let processedString = data[key] + " " + data[header.secondFieldName]
+                const processedData = []
+                if (
+                    data[header.thirdFieldName] &&
+                    data[header.thirdFieldName].length > 0
+                ) {
+                    data[header["thirdFieldName"]].forEach((recipient) => {
+                        if (recipient["firstName"] && recipient["lastName"]) {
+                            processedData.push(
+                                recipient["firstName"] + " " + recipient["lastName"],
+                            )
+                        } else {
+                            processedData.push(recipient["email"])
+                        }
+                    })
+                    processedString += "<hr>" + processedData.join(", <br>")
+                }
+                return processedString
+            } else if (header.date) {
+                if (typeof data[key] === "string") {
+                    data[key] = data[key].replace(/-/g, "/").substring(0, 20)
+                }
+                return this.formatDate(data[key], header.format)
+            } else if (header.eventName) {
                 return key
             }
             return data[key]
+        },
+        formatDate(date, format) {
+            if (format) {
+                return dayjs(date).format(format)
+            } else {
+                return dayjs(date).format("MM/DD/YYYY hh:mm A")
+            }
         },
         _link(data, header) {
             if (header.hyperLink) {
                 if (header.fieldName === "Edit Alert") {
                     return "#"
+                } else if (header.link) {
+                    const parts = header.link.split(/[{}]/)
+                    return `${parts[0]}${data[parts[1]]}`
                 } else {
                     return data[header.fieldName].link || this._cellValue(data, header)
                 }
             }
             return ""
-        }, _iconLink(data, header) {
+        },
+        _iconLink(data, header) {
             if (header.iconHyperLink) {
                 return data[header.fieldName].iconLink
             }
-            return ""
         },
-        _tableWidth() {
-            const reducer = (accumulator, currentValue) => accumulator + currentValue
-            return this.metadata.map((m) => m.width).reduce(reducer)
+        _fieldIcon(data, header) {
+            if (header.icon) {
+                return header.icon
+            }
+            return ""
         },
     },
 }
 </script>
+
 <style scoped lang="scss">
 .data-table {
     width: 100%;
@@ -262,7 +312,6 @@ td {
 }
 
 .navigation {
-    display: flex;
     flex-grow: 1;
     padding-top: 10px;
     padding-bottom: 8px;
@@ -293,5 +342,17 @@ a {
     height: 65px;
     width: 1000px;
     text-align: center;
+}
+
+.spinner {
+    margin: auto;
+}
+
+.loading {
+    width: 1164px;
+}
+
+.data-table-container {
+    height: 100%;
 }
 </style>

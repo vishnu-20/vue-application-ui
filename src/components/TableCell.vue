@@ -1,36 +1,78 @@
 <template>
-    <td :class="{ odd: isOddRow }" :style="{ color: color }">
-        <div :class="{ wrapper: true, centered: hasIcon }">
-            <span v-if="selectable">
-                <input
-                    type="checkbox"
-                    :checked="isSelected"
-                    @change="toggleSelection"
-                />
-            </span>
-            <span class="text-container">
-                <span v-if="!hasLink" class="text" v-html="fieldValue"></span>
-                <a v-if="hasLink" class="link" :href="link" @click="handleOpenModal">
-                    {{ fieldValue }}
-                </a>
-            </span>
-        </div>
-    </td>
+  <td :class="{ odd: isOddRow }" :style="{ color: color }">
+    <div :class="{ wrapper: true, centered: hasIcon }">
+      <span v-if="hasIcon" class="cell-icon">
+        <a v-if="hasIconLink" class="link" :href="iconLink">
+          <svg v-html="getIcon"></svg>
+        </a>
+        <svg
+          v-if="!hasIconLink"
+          v-html="getIcon"
+          :fill="iconColor"
+          width="20"
+          height="20"
+        ></svg>
+      </span>
+      <span class="text-container">
+        <span
+          v-if="!hasLink && !isClickEvent"
+          class="text"
+          v-html="fieldValue"
+        ></span>
+        <a v-if="hasLink" class="link" :href="link" target="_blank">
+          {{ fieldValue }}
+        </a>
+<a v-if="isClickEvent" class="link" @click="handleOpenModal">
+          {{ fieldValue }}
+        </a>
+      </span>
+    </div>
+  </td>
 </template>
-  <script>
-  export default {
-    name: "TableCell",
-    components: {  },
-    props: {
-        index: Number,
-    fieldValue: { type: String, default: "" },
-    link: { type: String, default: "" },
-    iconLink: { type: String, default: "" },
-    fieldIcon: { type: String, default: "" },
-    width: { type: Number, default: 100 },
-    color: { type: String, default: "#292E31" },
-    selectable: { type: Boolean, default: false },
-    isSelected: { type: Boolean, default: false },
+<script>
+import edit24 from "@fishtank/icons/dist/edit_24.svg?raw"
+const iconMap = {
+  edit24: edit24,
+}
+export default {
+  name: "TableCell",
+  components: {},
+  props: {
+    index: {
+      type: Number,
+    },
+    event: {
+      type: String,
+    },
+    fieldValue: {
+      type: String,
+      default: "",
+    },
+    link: {
+      type: String,
+      default: "",
+    },
+    iconLink: {
+      type: String,
+      default: "",
+    },
+    fieldIcon: {
+      type: String,
+      default: "",
+    },
+    width: {
+      type: Number,
+      default: 100,
+    },
+color: {
+      type: String,
+      default: "#292E31",
+    },
+    iconColor: {
+      type: String,
+      default: "#267ABD",
+    },
+
   },
   computed: {
     isOddRow() {
@@ -42,11 +84,17 @@
     hasLink() {
       return this.link !== ""
     },
+    hasIconLink() {
+      return this.iconLink !== ""
+    },
+    getIcon() {
+      return iconMap[this.fieldIcon] || ""
+    },
+    isClickEvent() {
+      return this.event === "click"
+    },
   },
   methods: {
-    toggleSelection() {
-      this.$emit("toggleRowSelection", this.index);
-    },
     handleOpenModal(data) {
       this.$emit("editAlert", data)
     },
@@ -62,7 +110,8 @@ td {
   font-size: 14px;
   font-weight: normal;
   letter-spacing: 0.1px;
-}td a {
+}
+td a {
   color: #267abd;
   text-decoration: none;
   cursor: pointer;
@@ -73,6 +122,7 @@ td.odd {
 .wrapper {
   display: flex;
   justify-content: space-between;
+  gap: 4px;
 }
 .link {
   cursor: pointer;
@@ -90,14 +140,8 @@ td.odd {
 .centered {
   justify-content: center;
 }
-.icon {
-  :deep(svg) {
-    width: 20px;
-    height: 20px;
-  }
-  :deep(path) {
-    fill: #267abd;
-  }
-  margin-top: 4px;
+.cell-icon {
+  align-content: center;
+  margin-top: 5px;
 }
 </style>

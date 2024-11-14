@@ -10,6 +10,7 @@
   "dependencies": {
     "@fishtank/icons": "^3.13.1",
     "core-js": "^3.8.3",
+    "dayjs": "^1.11.13",
     "flatpickr": "^4.6.13",
     "vue": "^3.2.13",
     "vue-flatpickr-component": "^11.0.5",
@@ -33,8 +34,7 @@
       "node": true
     },
     "extends": [
-      "plugin:vue/vue3-essential",
-      "eslint:recommended"
+      "plugin:vue/vue3-essential"
     ],
     "parserOptions": {
       "parser": "@babel/eslint-parser"
